@@ -333,30 +333,32 @@ public class MapNodes {
               INode<K, V> next = (INode<K, V>) curr.content[curr.content.length - 1 - idx];
               cursors[pos]++;
 
-              if (next instanceof Node) {
-                Node<K, V> n = (Node<K, V>) next;
+              if (next != null) {
+                if (next instanceof Node) {
+                  Node<K, V> n = (Node<K, V>) next;
 
-                if (n.nodemap != 0) {
-                  stack[++depth] = n;
-                  cursors[pos + 2] = 0;
-                  cursors[pos + 3] = (byte) bitCount(n.nodemap);
-                }
+                  if (n.nodemap != 0) {
+                    stack[++depth] = n;
+                    cursors[pos + 2] = 0;
+                    cursors[pos + 3] = (byte) bitCount(n.nodemap);
+                  }
 
-                if (n.datamap != 0) {
-                  this.content = n.content;
+                  if (n.datamap != 0) {
+                    this.content = n.content;
+                    this.idx = 0;
+                    this.limit = bitCount(n.datamap) << 1;
+
+                    return true;
+                  }
+
+                } else {
+                  Collision<K, V> c = (Collision<K, V>) next;
+                  this.content = c.entries;
                   this.idx = 0;
-                  this.limit = bitCount(n.datamap) << 1;
+                  this.limit = c.entries.length;
 
                   return true;
                 }
-
-              } else {
-                Collision<K, V> c = (Collision<K, V>) next;
-                this.content = c.entries;
-                this.idx = 0;
-                this.limit = c.entries.length;
-
-                return true;
               }
             } else {
               depth--;
